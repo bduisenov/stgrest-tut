@@ -3,25 +3,25 @@ version: "2.1"
 services:
 
   stgrest:
-    image: begriffs/postgrest:v0.4.1.0
+    image: subzerocloud/postgrest
     ports:
       - "3000:3000"
-    volumes:
-      - ./postgrest.conf:/etc/postgrest.conf
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - PGRST_DB_URI=postgres://postgres:postgres@postgres:5432/postgres
-      - PGRST_DB_SCHEMA=api
-      - PGRST_DB_ANON_ROLE=web_anon
-      - PGRST_JWT_SECRET=postgres
+      - DB_URI=postgres://postgres:postgres@postgres:5432/postgres
+      - DB_SCHEMA=api
+      - DB_ANON_ROLE=web_anon
+      - JWT_SECRET=postgres
+    mem_limit: 30m
+    memswap_limit: 30m
     networks:
       - stgrest-tut-network
     restart: always
 
   postgres:
-    image: postgres:9.6.2
+    image: postgres
     ports:
       - "5432:5432"
     healthcheck:
