@@ -1,0 +1,43 @@
+version: "2.1"
+
+services:
+
+  stgrest:
+    image: begriffs/postgrest:v0.4.1.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./postgrest.conf:/etc/postgrest.conf
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - PGRST_DB_URI=postgres://postgres:postgres@postgres:5432/postgres
+      - PGRST_DB_SCHEMA=api
+      - PGRST_DB_ANON_ROLE=web_anon
+      - PGRST_JWT_SECRET=postgres
+    networks:
+      - stgrest-tut-network
+    restart: always
+
+  postgres:
+    image: postgres:9.6.2
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgres_scripts/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data
+    networks:
+      - stgrest-tut-network
+
+networks:
+  stgrest-tut-network:
+    driver: bridge
